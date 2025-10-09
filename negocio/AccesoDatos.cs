@@ -23,7 +23,7 @@ namespace negocio
             //conexion = new SqlConnection("server=.\\SQLEXPRESS; database=PROMOS_DB; integrated security=true");
 
             // Con Docker
-            conexion = new SqlConnection("server=localhost; database=PROMOS_DB; user id=sa; password=BaseDeDatos#2");
+            conexion = new SqlConnection("server=localhost; database=CATALOGO_P3_DB; user id=sa; password=BaseDeDatos#2");
             comando = new SqlCommand();
         }
 
