@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Web.Http;
 using dominio;
 using negocio;
+using TPAPI_equipo_18A.Models;
 
 namespace TPAPI_equipo_18A.Controllers
 {
@@ -30,7 +31,7 @@ namespace TPAPI_equipo_18A.Controllers
         }
 
         // POST: api/Producto
-        public void Post([FromBody]string value)
+        public void Post([FromBody]ArticuloDto value)
         {
         }
 
