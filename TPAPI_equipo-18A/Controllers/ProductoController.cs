@@ -21,9 +21,12 @@ namespace TPAPI_equipo_18A.Controllers
         }
 
         // GET: api/Producto/5
-        public string Get(int id)
+        public Articulo Get(int id)
         {
-            return "value";
+            negocio = new ArticuloNegocio();
+            List<Articulo> lista = negocio.listar();
+
+            return lista.Find(articulo => articulo.Id == id);
         }
 
         // POST: api/Producto
