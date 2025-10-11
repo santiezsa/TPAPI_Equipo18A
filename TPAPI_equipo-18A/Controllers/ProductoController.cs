@@ -84,6 +84,8 @@ namespace TPAPI_equipo_18A.Controllers
         // DELETE: api/Producto/5
         public void Delete(int id)
         {
+            ArticuloNegocio negocio = new ArticuloNegocio();
+            negocio.eliminar(id);
         }
     }
 }
