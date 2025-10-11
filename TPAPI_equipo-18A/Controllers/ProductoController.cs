@@ -31,8 +31,22 @@ namespace TPAPI_equipo_18A.Controllers
         }
 
         // POST: api/Producto
-        public void Post([FromBody]ArticuloDto value)
+        public void Post([FromBody]ArticuloDto art)
         {
+            ArticuloNegocio negocio = new ArticuloNegocio();
+            Articulo nuevo = new Articulo();
+
+            MarcasNegocio marcaNegocio = new MarcasNegocio();
+            CategoriasNegocio categoriaNegocio = new CategoriasNegocio();
+
+            nuevo.Codigo = art.Codigo;
+            nuevo.Nombre = art.Nombre;
+            nuevo.Descripcion = art.Descripcion;
+            nuevo.Marca = new Marca { Id = art.IdMarca };
+            nuevo.Categoria = new Categoria { Id = art.IdCategoria };
+            nuevo.Precio = art.Precio;
+
+            negocio.agregar(nuevo);
         }
 
         // PUT: api/Producto/5

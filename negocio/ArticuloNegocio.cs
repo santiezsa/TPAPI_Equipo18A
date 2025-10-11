@@ -41,7 +41,7 @@ namespace negocio
                     aux.Categoria.Descripcion = (string)datos.Lector["Categoria"];
 
                     // Imagenes
-                    aux.Imagenes = listarImagenesPorArticulo(aux.Id);
+                    //aux.Imagenes = listarImagenesPorArticulo(aux.Id);
 
                     lista.Add(aux);
                 }
@@ -82,6 +82,103 @@ namespace negocio
                 datos.cerrarConexion();
             }
             return lista;
+        }
+
+        // INSERT DE DATOS SIMPLES Y CON CATEGORIAS Y MARCAS
+        public void agregar(Articulo articulo)
+        {
+            AccesoDatos datos = new AccesoDatos();
+            try
+            {
+                datos.setearConsulta("INSERT INTO ARTICULOS (Codigo, Nombre, Descripcion, IdMarca, IdCategoria, Precio) VALUES (@Codigo, @Nombre, @Descripcion, @IdMarca, @IdCategoria, @Precio); SELECT SCOPE_IDENTITY()");
+                datos.setearParametro("@Codigo", articulo.Codigo);
+                datos.setearParametro("@Nombre", articulo.Nombre);
+                datos.setearParametro("@Descripcion", articulo.Descripcion);
+                datos.setearParametro("@IdMarca", articulo.Marca.Id);
+                datos.setearParametro("@IdCategoria", articulo.Categoria.Id);
+                datos.setearParametro("@Precio", articulo.Precio);
+
+                int nuevoIdArticulo = Convert.ToInt32(datos.ejecutarLecturaScalar());
+
+                // Insertar las imagenes asociadas al articulo
+                if (articulo.Imagenes != null)
+                {
+                    foreach (var imagen in articulo.Imagenes)
+                    {
+                        datos.setearConsulta("INSERT INTO IMAGENES (IdArticulo, ImagenUrl) VALUES (@IdArticulo, @ImagenUrl)");
+                        datos.setearParametro("@IdArticulo", nuevoIdArticulo);
+                        datos.setearParametro("@ImagenUrl", imagen.ImagenUrl);
+                        datos.ejecutarAccion();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+
+        public void modificar(Articulo articulo)
+        {
+            AccesoDatos datos = new AccesoDatos();
+            try
+            {
+                // Actualizar los datos del articulo principal
+                datos.setearConsulta("UPDATE ARTICULOS SET Codigo = @Codigo, Nombre = @Nombre, Descripcion = @Descripcion, IdMarca = @IdMarca, IdCategoria = @IdCategoria, Precio = @Precio WHERE Id = @Id");
+                datos.setearParametro("@Codigo", articulo.Codigo);
+                datos.setearParametro("@Nombre", articulo.Nombre);
+                datos.setearParametro("@Descripcion", articulo.Descripcion);
+                datos.setearParametro("@IdMarca", articulo.Marca.Id);
+                datos.setearParametro("@IdCategoria", articulo.Categoria.Id);
+                datos.setearParametro("@Precio", articulo.Precio);
+                datos.setearParametro("@Id", articulo.Id);
+                datos.ejecutarAccion();
+                datos.cerrarConexion();
+
+                //Actualizar nuevas imagenes
+                if (articulo.Imagenes.Count > 0)
+                {
+                    AccesoDatos datosImagen = new AccesoDatos();
+                    datosImagen.setearConsulta("UPDATE IMAGENES SET ImagenUrl = @ImagenUrl WHERE IdArticulo = @IdArticulo");
+                    datosImagen.setearParametro("@ImagenUrl", articulo.Imagenes[0].ImagenUrl);
+                    datosImagen.setearParametro("@IdArticulo", articulo.Id);
+                    datosImagen.ejecutarAccion();
+                    datosImagen.cerrarConexion();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public void eliminar(int id)
+        {
+            AccesoDatos datos = new AccesoDatos();
+            try
+            {
+                // Elimino imagenes asociadas al articulo
+                datos.setearConsulta("DELETE FROM Imagenes WHERE IDArticulo = @IDArticulo");
+                datos.setearParametro("@IDArticulo", id);
+                datos.ejecutarAccion();
+
+                // Elimino articulo               
+                datos.setearConsulta("delete from ARTICULOS where id = @id");
+                datos.setearParametro("@id", id);
+                datos.ejecutarAccion();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
         }
     }
 }
