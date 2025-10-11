@@ -15,6 +15,7 @@ namespace negocio
         {
             List<Articulo> lista = new List<Articulo>();
             AccesoDatos datos = new AccesoDatos();
+            ImagenNegocio imagenNegocio = new ImagenNegocio();
 
             try
             {
@@ -41,7 +42,7 @@ namespace negocio
                     aux.Categoria.Descripcion = (string)datos.Lector["Categoria"];
 
                     // Imagenes
-                    //aux.Imagenes = listarImagenesPorArticulo(aux.Id);
+                    aux.Imagenes = imagenNegocio.listarImagenesPorArticulo(aux.Id);
 
                     lista.Add(aux);
                 }
@@ -88,6 +89,7 @@ namespace negocio
         public void agregar(Articulo articulo)
         {
             AccesoDatos datos = new AccesoDatos();
+            ImagenNegocio imagenNegocio = new ImagenNegocio();
             try
             {
                 datos.setearConsulta("INSERT INTO ARTICULOS (Codigo, Nombre, Descripcion, IdMarca, IdCategoria, Precio) VALUES (@Codigo, @Nombre, @Descripcion, @IdMarca, @IdCategoria, @Precio); SELECT SCOPE_IDENTITY()");
@@ -101,15 +103,9 @@ namespace negocio
                 int nuevoIdArticulo = Convert.ToInt32(datos.ejecutarLecturaScalar());
 
                 // Insertar las imagenes asociadas al articulo
-                if (articulo.Imagenes != null)
+                if (articulo.Imagenes != null && articulo.Imagenes.Count > 0)
                 {
-                    foreach (var imagen in articulo.Imagenes)
-                    {
-                        datos.setearConsulta("INSERT INTO IMAGENES (IdArticulo, ImagenUrl) VALUES (@IdArticulo, @ImagenUrl)");
-                        datos.setearParametro("@IdArticulo", nuevoIdArticulo);
-                        datos.setearParametro("@ImagenUrl", imagen.ImagenUrl);
-                        datos.ejecutarAccion();
-                    }
+                    imagenNegocio.agregarImagenes(nuevoIdArticulo, articulo.Imagenes);
                 }
             }
             catch (Exception ex)
@@ -139,16 +135,6 @@ namespace negocio
                 datos.ejecutarAccion();
                 datos.cerrarConexion();
 
-                //Actualizar nuevas imagenes
-                if (articulo.Imagenes.Count > 0)
-                {
-                    AccesoDatos datosImagen = new AccesoDatos();
-                    datosImagen.setearConsulta("UPDATE IMAGENES SET ImagenUrl = @ImagenUrl WHERE IdArticulo = @IdArticulo");
-                    datosImagen.setearParametro("@ImagenUrl", articulo.Imagenes[0].ImagenUrl);
-                    datosImagen.setearParametro("@IdArticulo", articulo.Id);
-                    datosImagen.ejecutarAccion();
-                    datosImagen.cerrarConexion();
-                }
             }
             catch (Exception ex)
             {
@@ -159,12 +145,11 @@ namespace negocio
         public void eliminar(int id)
         {
             AccesoDatos datos = new AccesoDatos();
+            ImagenNegocio imagenNegocio = new ImagenNegocio();
             try
             {
                 // Elimino imagenes asociadas al articulo
-                datos.setearConsulta("DELETE FROM Imagenes WHERE IDArticulo = @IDArticulo");
-                datos.setearParametro("@IDArticulo", id);
-                datos.ejecutarAccion();
+                imagenNegocio.eliminarImagenesPorArticulo(id);
 
                 // Elimino articulo               
                 datos.setearConsulta("delete from ARTICULOS where id = @id");
