@@ -67,8 +67,8 @@ namespace TPAPI_equipo_18A.Controllers
             ArticuloNegocio negocio = new ArticuloNegocio();
             Articulo nuevo = new Articulo();
 
-            MarcasNegocio marcaNegocio = new MarcasNegocio();
-            CategoriasNegocio categoriaNegocio = new CategoriasNegocio();
+            // Asigno ID
+            nuevo.Id = id;
 
             nuevo.Codigo = art.Codigo;
             nuevo.Nombre = art.Nombre;

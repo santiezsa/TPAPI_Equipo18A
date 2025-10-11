@@ -133,12 +133,15 @@ namespace negocio
                 datos.setearParametro("@Precio", articulo.Precio);
                 datos.setearParametro("@Id", articulo.Id);
                 datos.ejecutarAccion();
-                datos.cerrarConexion();
 
             }
             catch (Exception ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                datos.cerrarConexion();
             }
         }
 
