@@ -23,13 +23,34 @@ namespace TPAPI_equipo_18A.Controllers
         }
 
         // GET: api/Producto/5
-        public Articulo Get(int id)
-        {
-            negocio = new ArticuloNegocio();
-            List<Articulo> lista = negocio.listar();
 
-            return lista.Find(articulo => articulo.Id == id);
+        //VERIFICAR ESTO, NO DEVUELVE UN OBJETO ARTICULO, SINO UN HTTPRESPONSEMESSAGE
+        public HttpResponseMessage Get(int id)
+        {
+            try
+            {
+                if (id <= 0)
+                {
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, "El ID del artículo no puede ser menor o igual a cero.");
+                }
+
+                ArticuloNegocio negocio = new ArticuloNegocio();
+                List<Articulo> lista = negocio.listar();
+                Articulo articuloEncontrado = lista.Find(articulo => articulo.Id == id);
+
+                if (articuloEncontrado == null)
+                {
+                    return Request.CreateResponse(HttpStatusCode.NotFound, "No existe artículo con el ID proporcionado.");
+                }
+
+                return Request.CreateResponse(HttpStatusCode.OK, articuloEncontrado);
+            }
+            catch (Exception ex)
+            {
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, "Error al obtener el artículo: " + ex.Message);
+            }
         }
+
 
         // POST: api/Producto
         public HttpResponseMessage Post([FromBody] ArticuloDto art)
@@ -160,7 +181,7 @@ namespace TPAPI_equipo_18A.Controllers
                 Categoria categoria = categoriaNegocio.listar().Find(x => x.Id == art.IdCategoria);
 
                 if (marca == null)
-                    return Request.CreateResponse(HttpStatusCode.BadRequest, "La marca no existe." + art.IdMarca );
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, "La marca no existe." + art.IdMarca + art.IdCategoria);
 
                 if (categoria == null)
                     return Request.CreateResponse(HttpStatusCode.BadRequest, "La categoría no existe.");
