@@ -32,22 +32,63 @@ namespace TPAPI_equipo_18A.Controllers
         }
 
         // POST: api/Producto
-        public void Post([FromBody] ArticuloDto art)
+        public HttpResponseMessage Post([FromBody] ArticuloDto art)
         {
-            ArticuloNegocio negocio = new ArticuloNegocio();
-            Articulo nuevo = new Articulo();
+            try
+            {
+                if (art == null)
+                {
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, "El cuerpo de la solicitud no puede ser nulo.");
+                }
+                ArticuloNegocio negocio = new ArticuloNegocio();
+                Articulo nuevo = new Articulo();
+                MarcasNegocio marcaNegocio = new MarcasNegocio();
+                CategoriasNegocio categoriaNegocio = new CategoriasNegocio();
 
-            MarcasNegocio marcaNegocio = new MarcasNegocio();
-            CategoriasNegocio categoriaNegocio = new CategoriasNegocio();
+                if (string.IsNullOrEmpty(art.Codigo))
+                    {
+                        return Request.CreateResponse(HttpStatusCode.BadRequest, "El código de artículo no puede ser nulo.");
+                    }
+                nuevo.Codigo = art.Codigo;
 
-            nuevo.Codigo = art.Codigo;
-            nuevo.Nombre = art.Nombre;
-            nuevo.Descripcion = art.Descripcion;
-            nuevo.Marca = new Marca { Id = art.IdMarca };
-            nuevo.Categoria = new Categoria { Id = art.IdCategoria };
-            nuevo.Precio = art.Precio;
+                if (string.IsNullOrEmpty(art.Nombre))
+                {
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, "El nombre del artículo no puede ser nulo.");
+                }
+                nuevo.Nombre = art.Nombre;
 
-            negocio.agregar(nuevo);
+                if (string.IsNullOrEmpty(art.Descripcion))
+                {
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, "La descripción del artículo no puede ser nula.");
+                }
+                nuevo.Descripcion = art.Descripcion;
+                nuevo.Marca = new Marca { Id = art.IdMarca };
+                nuevo.Categoria = new Categoria { Id = art.IdCategoria };
+
+                if (art.Precio <= 0)
+                {
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, "El precio del artículo no puede ser menor o igual a cero.");
+                }
+                nuevo.Precio = art.Precio;
+
+                Marca marca = marcaNegocio.listar().Find(x => x.Id == art.IdMarca);
+                Categoria categoria = categoriaNegocio.listar().Find(x => x.Id == art.IdCategoria);
+
+                if (marca == null)
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, "La marca no existe.");
+
+                if (categoria == null)
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, "La categoría no existe.");
+
+                negocio.agregar(nuevo);
+
+                return Request.CreateResponse(HttpStatusCode.Created, "Articulo agregado.");
+
+            }
+            catch (Exception ex)
+            {
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, "Error al crear el producto: " + ex.Message.ToString());
+            }
         }
 
         // POST: api/Producto/Imagen/{idArticulo}
